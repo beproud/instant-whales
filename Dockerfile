@@ -1,3 +1,3 @@
-FROM golang:1.6.0-alpine
+FROM alpine
 COPY ./instant-whales /instant-whales
 CMD "/instant-whales"
