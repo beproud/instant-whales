@@ -39,7 +39,7 @@ func runContainersView(c *gin.Context) {
 		return
 	}
 
-	id, err := runContainer(json.Image)
+	ci, err := runContainer(json.Image)
 	if err != nil {
 		if err == docker.ErrNoSuchImage {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -50,10 +50,14 @@ func runContainersView(c *gin.Context) {
 			panic(err)
 		}
 	}
-	go timeoutKill(id, timeout)  // To kill containers as async.
+	go timeoutKill(ci.ID, timeout)  // To kill containers as async.
 
 	c.JSON(http.StatusOK, gin.H{
-		"containerId": id,
+		"containerId": ci.ID,
+		"image": json.Image,
+		"timeout": timeout,
+		"port": ci.Port,
+		"ports": ci.Ports,
 	})
 }
 

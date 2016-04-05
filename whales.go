@@ -8,6 +8,24 @@ import (
 )
 
 
+type Ports map[docker.Port][]docker.PortBinding
+
+
+type ContainerInfo struct {
+	ID string
+        Port string
+	Ports Ports
+}
+
+
+// Extract port as string from Ports
+func portsToPort(ports Ports) string {
+	for _, v := range ports {
+		return v[0].HostPort
+	}
+	return ""
+}
+
 
 func listImages() []string {
 	var r []string
@@ -22,7 +40,7 @@ func listImages() []string {
 	return r
 }
 
-func runContainer(image string) (string, error) {
+func runContainer(image string) (ContainerInfo, error) {
 	client, _ := docker.NewClientFromEnv()
 	config := docker.Config{
 		Image: image,
@@ -35,10 +53,11 @@ func runContainer(image string) (string, error) {
 		HostConfig: &host,
 	})
 	if err != nil {
-		return "", err
+		return ContainerInfo{}, err
 	}
 	client.StartContainer(c.ID, &host)
-	return c.ID, nil
+	c, _ = client.InspectContainer(c.ID)
+	return ContainerInfo{c.ID, portsToPort(c.NetworkSettings.Ports), c.NetworkSettings.Ports}, nil
 }
 
 
