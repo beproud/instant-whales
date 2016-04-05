@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fsouza/go-dockerclient"
 )
@@ -21,11 +22,27 @@ func listContainers() {
     }
 }
 
-func createContainer() {
-
+func runContainer() string {
+	client, _ := docker.NewClientFromEnv()
+	config := docker.Config{
+		Image: "redis",
+	}
+	c, _ := client.CreateContainer(docker.CreateContainerOptions{
+		Config: &config,
+	})
+	client.StartContainer(c.ID, &docker.HostConfig{})
+	return c.ID
 }
 
 
-func killContainer() {
+func killContainer(id string) {
+	client, _ := docker.NewClientFromEnv()
+	client.KillContainer(docker.KillContainerOptions{ID: id})
+	client.RemoveContainer(docker.RemoveContainerOptions{ID: id})
+}
 
+
+func timeoutKill(id string, timeout int) {
+	time.Sleep(time.Second * time.Duration(timeout))
+	killContainer(id)
 }

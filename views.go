@@ -3,17 +3,10 @@ package main
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-
-func timeoutKill(timeout int) {
-	time.Sleep(time.Second * time.Duration(timeout))
-	println("Hi")
-
-}
 
 type ContainersJSON struct {
 	Container string `json:"container" binding:"required"`
@@ -38,10 +31,10 @@ func createContainersView(c *gin.Context) {
 		return
 	}
 
-	go timeoutKill(timeout)  // To kill containers as async.
-	listContainers()
+	id := runContainer()
+	go timeoutKill(id, timeout)  // To kill containers as async.
 
 	c.JSON(http.StatusOK, gin.H{
-		"postedContainer": json.Container,
+		"containerId": id,
 	})
 }
