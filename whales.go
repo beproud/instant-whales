@@ -27,13 +27,17 @@ func runContainer(image string) (string, error) {
 	config := docker.Config{
 		Image: image,
 	}
+	host := docker.HostConfig{
+		PublishAllPorts: true,
+	}
 	c, err := client.CreateContainer(docker.CreateContainerOptions{
 		Config: &config,
+		HostConfig: &host,
 	})
 	if err != nil {
 		return "", err
 	}
-	client.StartContainer(c.ID, &docker.HostConfig{})
+	client.StartContainer(c.ID, &host)
 	return c.ID, nil
 }
 
