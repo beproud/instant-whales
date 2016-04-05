@@ -1,11 +1,16 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 )
 
 
 func main() {
+	if os.Getenv("INSTANT_WHALES_RELEASE_MODE") == "1" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
 	r.GET("/images", listImagesView)
 	r.POST("/containers", runContainersView)
