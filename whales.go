@@ -35,10 +35,10 @@ func runContainer() string {
 }
 
 
-func killContainer(id string) {
+func killContainer(id string) error {
 	client, _ := docker.NewClientFromEnv()
 	client.KillContainer(docker.KillContainerOptions{ID: id})
-	client.RemoveContainer(docker.RemoveContainerOptions{ID: id})
+	return client.RemoveContainer(docker.RemoveContainerOptions{ID: id})
 }
 
 

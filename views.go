@@ -38,3 +38,10 @@ func runContainersView(c *gin.Context) {
 		"containerId": id,
 	})
 }
+
+
+func killContainerView(c *gin.Context) {
+	id := c.Param("id")
+	killContainer(id)
+	c.Status(http.StatusNoContent)
+}
