@@ -14,7 +14,7 @@ type ContainersJSON struct {
 }
 
 
-func createContainersView(c *gin.Context) {
+func runContainersView(c *gin.Context) {
 	var json ContainersJSON
 	if err := c.Bind(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
