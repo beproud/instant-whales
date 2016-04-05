@@ -5,17 +5,18 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/fsouza/go-dockerclient"
 )
 
 
-type ContainersJSON struct {
-	Container string `json:"container" binding:"required"`
+type RunContainersJSON struct {
+	Image string `json:"image" binding:"required"`
 	Timeout string `json:"timeout" binding:"required,numeric"`
 }
 
 
 func runContainersView(c *gin.Context) {
-	var json ContainersJSON
+	var json RunContainersJSON
 	if err := c.Bind(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid_params",
@@ -31,7 +32,17 @@ func runContainersView(c *gin.Context) {
 		return
 	}
 
-	id := runContainer()
+	id, err := runContainer(json.Image)
+	if err != nil {
+		if err == docker.ErrNoSuchImage {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "no such image",
+			})
+			return
+		} else {
+			panic(err)
+		}
+	}
 	go timeoutKill(id, timeout)  // To kill containers as async.
 
 	c.JSON(http.StatusOK, gin.H{

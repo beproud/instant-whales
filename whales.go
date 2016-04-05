@@ -22,16 +22,19 @@ func listContainers() {
     }
 }
 
-func runContainer() string {
+func runContainer(image string) (string, error) {
 	client, _ := docker.NewClientFromEnv()
 	config := docker.Config{
-		Image: "redis",
+		Image: image,
 	}
-	c, _ := client.CreateContainer(docker.CreateContainerOptions{
+	c, err := client.CreateContainer(docker.CreateContainerOptions{
 		Config: &config,
 	})
+	if err != nil {
+		return "", err
+	}
 	client.StartContainer(c.ID, &docker.HostConfig{})
-	return c.ID
+	return c.ID, nil
 }
 
 
