@@ -15,6 +15,13 @@ type RunContainersJSON struct {
 }
 
 
+func listImagesView(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"images": listImages(),
+	})
+}
+
+
 func runContainersView(c *gin.Context) {
 	var json RunContainersJSON
 	if err := c.Bind(&json); err != nil {

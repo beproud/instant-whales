@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"sort"
 	"time"
 
 	"github.com/fsouza/go-dockerclient"
@@ -9,17 +9,17 @@ import (
 
 
 
-func listContainers() {
-    client, _ := docker.NewClientFromEnv()
-    imgs, _ := client.ListImages(docker.ListImagesOptions{All: false})
-    for _, img := range imgs {
-        fmt.Println("ID: ", img.ID)
-        fmt.Println("RepoTags: ", img.RepoTags)
-        fmt.Println("Created: ", img.Created)
-        fmt.Println("Size: ", img.Size)
-        fmt.Println("VirtualSize: ", img.VirtualSize)
-        fmt.Println("ParentId: ", img.ParentID)
-    }
+func listImages() []string {
+	var r []string
+	client, _ := docker.NewClientFromEnv()
+	imgs, _ := client.ListImages(docker.ListImagesOptions{All: false})
+	for _, img := range imgs {
+		if img.RepoTags[0] != "<none>:<none>" {
+			r = append(r, img.RepoTags[0])
+		}
+	}
+	sort.Strings(r)
+	return r
 }
 
 func runContainer(image string) (string, error) {
