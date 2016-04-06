@@ -18,7 +18,7 @@ Return running containers.
 Run a new container.
 Requests should be like this.
 
-```
+```json
 {
   "image": "redis",
   "expires": 60
@@ -30,7 +30,7 @@ Requests should be like this.
 
 Responses will be like this.
 
-```
+```json
 {
     "containerId": "90b4833113325a234fb7c4477a2fcd0c40bcda183527bc68c9aad51ac3a4eb52",
     "image": "redis",
