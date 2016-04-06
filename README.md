@@ -1,7 +1,7 @@
 # Instant Whales
 
-API Server to run/kill Docker containers instantly.
-This server is for internal use. Don't publish the server on the Internet.
+API Server to run/kill Docker containers with expires time.
+This server is for internal use. Don't publish the server on the Internet directly.
 
 The benefit of this server is that it can handle 'expires' of containers.
 Instant Whales shouldn't handle backends too much.
