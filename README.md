@@ -3,7 +3,7 @@
 API Server to run/kill Docker containers instantly.
 This server is for internal use. Don't publish the server on the Internet.
 
-The benefit of this server is that it can handle 'timeout' (or expires) of containers.
+The benefit of this server is that it can handle 'expires' of containers.
 Instant Whales shouldn't handle backends too much.
 Basically, it should be solved by Kubernetes, AWS ECS or so.
 
@@ -21,12 +21,12 @@ Requests should be like this.
 ```
 {
   "image": "redis",
-  "timeout": 60
+  "expires": 60
 }
 ```
 
 * image: Docker image name to run
-* timeout: Seconds to run the container. After specified seconds, the container will be killed.
+* expires: Seconds to run the container. After specified seconds, the container will be killed.
 
 Responses will be like this.
 
@@ -43,7 +43,7 @@ Responses will be like this.
             }
         ]
     },
-    "timeout": 180
+    "expires": 180
 }
 ```
 

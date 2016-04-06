@@ -11,7 +11,7 @@ import (
 
 type RunContainersJSON struct {
 	Image string `json:"image" binding:"required"`
-	Timeout string `json:"timeout" binding:"required,numeric"`
+	Expires string `json:"expires" binding:"required,numeric"`
 }
 
 
@@ -38,10 +38,10 @@ func runContainersView(c *gin.Context) {
 		return
 
 	}
-	timeout, _ := strconv.Atoi(json.Timeout)
-	if timeout <= 0 || timeout > 600 {
+	expires, _ := strconv.Atoi(json.Expires)
+	if expires <= 0 || expires > 600 {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "timeout shoud be in 0 < timeout <= 600",
+			"error": "expires shoud be in 0 < expires <= 600",
 		})
 		return
 	}
@@ -57,12 +57,12 @@ func runContainersView(c *gin.Context) {
 			panic(err)
 		}
 	}
-	go timeoutKill(ci.ID, timeout)  // To kill containers as async.
+	go timeoutKill(ci.ID, expires)  // To kill containers as async.
 
 	c.JSON(http.StatusOK, gin.H{
 		"containerId": ci.ID,
 		"image": json.Image,
-		"timeout": timeout,
+		"expires": expires,
 		"port": ci.Port,
 		"ports": ci.Ports,
 	})
