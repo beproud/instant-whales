@@ -27,6 +27,7 @@ Requests should be like this.
 
 * image: Docker image name to run
 * expires: Seconds to run the container. After specified seconds, the container will be killed.
+    * Specify 0 not to expire the container
 
 Responses will be like this.
 

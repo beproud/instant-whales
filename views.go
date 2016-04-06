@@ -39,9 +39,9 @@ func runContainersView(c *gin.Context) {
 
 	}
 	expires, _ := strconv.Atoi(json.Expires)
-	if expires <= 0 || expires > 600 {
+	if expires < 0 || expires > 1800 {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "expires shoud be in 0 < expires <= 600",
+			"error": "expires shoud be in 0 <= expires <= 1800",
 		})
 		return
 	}
@@ -57,7 +57,9 @@ func runContainersView(c *gin.Context) {
 			panic(err)
 		}
 	}
-	go timeoutKill(ci.ID, expires)  // To kill containers as async.
+	if expires != 0 {
+		go timeoutKill(ci.ID, expires)  // To kill containers as async.
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"containerId": ci.ID,
