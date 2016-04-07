@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/fsouza/go-dockerclient"
@@ -11,7 +10,8 @@ import (
 
 type RunContainersJSON struct {
 	Image string `json:"image" binding:"required"`
-	Expires string `json:"expires" binding:"required,numeric"`
+	Expires int `json:"expires" binding:"required"`
+	Memory int `json:"memory"`
 }
 
 
@@ -33,20 +33,24 @@ func runContainersView(c *gin.Context) {
 	var json RunContainersJSON
 	if err := c.Bind(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid_params",
+			"error": err,
 		})
 		return
 
 	}
-	expires, _ := strconv.Atoi(json.Expires)
+	expires := json.Expires
 	if expires < 0 || expires > 1800 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "expires shoud be in 0 <= expires <= 1800",
 		})
 		return
 	}
+	memory := json.Memory
+	if memory == 0 {
+		memory = 16
+	}
 
-	ci, err := runContainer(json.Image)
+	ci, err := runContainer(json.Image, memory)
 	if err != nil {
 		if err == docker.ErrNoSuchImage {
 			c.JSON(http.StatusNotFound, gin.H{
