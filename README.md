@@ -21,13 +21,15 @@ Requests should be like this.
 ```json
 {
   "image": "redis",
-  "expires": 60
+  "expires": 60,
+  "memory": 32
 }
 ```
 
 * image: Docker image name to run
 * expires: Seconds to run the container. After specified seconds, the container will be killed.
     * Specify 0 not to expire the container
+* memory: Memory amount to allocate for the container (as MB). 
 
 Responses will be like this.
 
