@@ -10,8 +10,8 @@ import (
 
 type RunContainersJSON struct {
 	Image string `json:"image" binding:"required"`
-	Expires int `json:"expires" binding:"required"`
-	Memory int `json:"memory"`
+	Expires int `json:"expires" binding:"max=1800,min=0"`
+	Memory int `json:"memory" binding:"max=2048,min=1"`
 }
 
 
@@ -38,13 +38,6 @@ func runContainersView(c *gin.Context) {
 		return
 
 	}
-	expires := json.Expires
-	if expires < 0 || expires > 1800 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "expires shoud be in 0 <= expires <= 1800",
-		})
-		return
-	}
 	memory := json.Memory
 	if memory == 0 {
 		memory = 16
@@ -61,6 +54,7 @@ func runContainersView(c *gin.Context) {
 			panic(err)
 		}
 	}
+	expires := json.Expires
 	if expires != 0 {
 		go timeoutKill(ci.ID, expires)  // To kill containers as async.
 	}
