@@ -72,6 +72,7 @@ func runContainer(image string, memory int) (ContainerInfo, error) {
 		Image: image,
 		Memory: mr,
 		MemoryReservation: mr,
+		KernelMemory: 16 * 1024 * 1024,
 	}
 	host := docker.HostConfig{
 		PublishAllPorts: true,
