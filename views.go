@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/fsouza/go-dockerclient"
+	"github.com/docker/engine-api/client"
 )
 
 
@@ -45,7 +45,7 @@ func runContainersView(c *gin.Context) {
 
 	ci, err := runContainer(json.Image, memory)
 	if err != nil {
-		if err == docker.ErrNoSuchImage {
+		if client.IsErrImageNotFound(err) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": "no such image",
 			})

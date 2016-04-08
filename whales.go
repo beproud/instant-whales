@@ -3,12 +3,13 @@ package main
 import (
 	"sort"
 	"time"
-
-	"github.com/fsouza/go-dockerclient"
+	"github.com/docker/engine-api/client"
+	"github.com/docker/engine-api/types"
+	"github.com/docker/engine-api/types/container"
+	"github.com/docker/engine-api/types/network"
+	"github.com/docker/go-connections/nat"
+	"golang.org/x/net/context"
 )
-
-
-type Ports map[docker.Port][]docker.PortBinding
 
 
 type ContainerPs struct {
@@ -22,12 +23,12 @@ type ContainerPs struct {
 type ContainerInfo struct {
 	ID string
 	Port string
-	Ports Ports
+	Ports nat.PortMap
 }
 
 
 // Extract port as string from Ports
-func portsToPort(ports Ports) string {
+func portsToPort(ports nat.PortMap) string {
 	for _, v := range ports {
 		return v[0].HostPort
 	}
@@ -37,8 +38,11 @@ func portsToPort(ports Ports) string {
 
 func listImages() []string {
 	var r []string
-	client, _ := docker.NewClientFromEnv()
-	imgs, _ := client.ListImages(docker.ListImagesOptions{All: false})
+	c, _ := client.NewEnvClient()
+	imgs, _ := c.ImageList(
+		context.Background(),
+		types.ImageListOptions{All: false},
+	)
 	for _, img := range imgs {
 		if img.RepoTags[0] != "<none>:<none>" {
 			r = append(r, img.RepoTags[0])
@@ -51,8 +55,11 @@ func listImages() []string {
 
 func listContainers() []ContainerPs {
 	var r []ContainerPs
-	client, _ := docker.NewClientFromEnv()
-	l, _ := client.ListContainers(docker.ListContainersOptions{All: false})
+	c, _ := client.NewEnvClient()
+	l, _ := c.ContainerList(
+		context.Background(),
+		types.ContainerListOptions{All: false},
+	)
 	for _, c := range l {
 		r = append(r, ContainerPs{
 			ID: c.ID,
@@ -66,36 +73,40 @@ func listContainers() []ContainerPs {
 
 
 func runContainer(image string, memory int) (ContainerInfo, error) {
-	client, _ := docker.NewClientFromEnv()
+	cl, _ := client.NewEnvClient()
 	mr := int64(memory) * 1024 * 1024
-	config := docker.Config{
+	config := container.Config{
 		Image: image,
-		Memory: mr,
-		MemoryReservation: mr,
-		KernelMemory: 16 * 1024 * 1024,
 	}
-	host := docker.HostConfig{
+	host := container.HostConfig{
 		PublishAllPorts: true,
+		Resources: container.Resources{
+			Memory: mr,
+			KernelMemory: 16 * 1024 * 1024,
+		},
 	}
-	c, err := client.CreateContainer(docker.CreateContainerOptions{
-		Config: &config,
-		HostConfig: &host,
-	})
+	ctx := context.Background()
+	c, err := cl.ContainerCreate(
+		ctx,
+		&config,
+		&host,
+		&network.NetworkingConfig{},
+		"",
+	)
 	if err != nil {
 		return ContainerInfo{}, err
 	}
-	client.StartContainer(c.ID, &host)
-	c, _ = client.InspectContainer(c.ID)
+	cl.ContainerStart(ctx, c.ID)
+	ins, _ := cl.ContainerInspect(ctx, c.ID)
 	return ContainerInfo{
-		c.ID, portsToPort(c.NetworkSettings.Ports), c.NetworkSettings.Ports,
+		ins.ID, portsToPort(ins.NetworkSettings.Ports), ins.NetworkSettings.Ports,
 	}, nil
 }
 
 
 func killContainer(id string) error {
-	client, _ := docker.NewClientFromEnv()
-	client.KillContainer(docker.KillContainerOptions{ID: id})
-	return client.RemoveContainer(docker.RemoveContainerOptions{ID: id})
+	cl, _ := client.NewEnvClient()
+	return cl.ContainerKill(context.Background(), id, "SIGKILL")
 }
 
 
