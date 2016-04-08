@@ -68,12 +68,10 @@ func listContainers() []ContainerPs {
 func runContainer(image string, memory int) (ContainerInfo, error) {
 	client, _ := docker.NewClientFromEnv()
 	mr := int64(memory) * 1024 * 1024
-	ms := int64(memory) * 2 * 1024 * 1024
 	config := docker.Config{
 		Image: image,
 		Memory: mr,
 		MemoryReservation: mr,
-		MemorySwap: ms,
 	}
 	host := docker.HostConfig{
 		PublishAllPorts: true,
